@@ -36,8 +36,7 @@ def discogs_search(**params):
     token = os.environ.get("DISCOGS_TOKEN")
     if not token:
         raise DiscogsError(
-            "DISCOGS_TOKEN is not set. Create a personal access token at "
-            "discogs.com/settings/developers and set it as an environment variable."
+            "DISCOGS_TOKEN is not set."
         )
 
     key = tuple(sorted(params.items()))
