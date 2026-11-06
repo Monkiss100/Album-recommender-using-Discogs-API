@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Similar Albums</title>
+</head>
+<body>
+  <h1>Similar Albums</h1>
+  <p>Enter a album you like (e.g. Radiohead - Kid A). Powered by Discogs.</p>
+
+  <form method="post">
+    <textarea name="albums" rows="6" cols="60">{{ query }}</textarea><br>
+    <button type="submit">Get</button>
+  </form>
+
+  {% if error %}<p><strong>Error:</strong> {{ error }}</p>{% endif %}
+
+  {% if missing %}<p>Couldn't find: {{ missing | join(", ") }}</p>{% endif %}
+
+  {% if seeds %}
+    <h2>Based on</h2>
+    <ul>
+      {% for s in seeds %}
+        <li>{{ s.album }}{% if s.artist %} by {{ s.artist }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if recs is not none and not error %}
+    {% if recs %}
+      <h2>You might like</h2>
+      <ol>
+        {% for r in recs %}
+          <li>
+            <a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.album }}</a> by {{ r.artist }}
+            {% if r.year %}({{ r.year }}){% endif %}
+            {% if r.shared_styles %}<br>Styles: {{ r.shared_styles | join(", ") }}{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    {% elif seeds %}
+      <p>No similar albums found. Try adding more albums.</p>
+    {% endif %}
+  {% endif %}
+</body>
+</html>
