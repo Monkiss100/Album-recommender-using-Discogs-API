@@ -43,5 +43,57 @@
       <p>No similar albums found. Try adding more albums.</p>
     {% endif %}
   {% endif %}
+  <script>
+    const box = document.getElementById("albums");
+    const list = document.getElementById("suggestions");
+    let timer = null;
+ 
+    function currentLine() {
+      const text = box.value, pos = box.selectionStart;
+      const start = text.lastIndexOf("\n", pos - 1) + 1;
+      let end = text.indexOf("\n", pos);
+      if (end === -1) end = text.length;
+      return { start, end, text: text.slice(start, end).trim() };
+    }
+ 
+    function hide() { list.hidden = true; list.innerHTML = ""; }
+ 
+    function show(titles) {
+      list.innerHTML = "";
+      if (!titles.length) return hide();
+      for (const t of titles) {
+        const li = document.createElement("li");
+        li.textContent = t;
+        li.style.cursor = "pointer";
+        // mousedown fires before the textarea loses focus
+        li.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          const line = currentLine();
+          box.value = box.value.slice(0, line.start) + t + box.value.slice(line.end);
+          box.selectionStart = box.selectionEnd = line.start + t.length;
+          hide();
+          box.focus();
+        });
+        list.appendChild(li);
+      }
+      list.hidden = false;
+    }
+ 
+    box.addEventListener("input", () => {
+      clearTimeout(timer);
+      const line = currentLine();
+      if (line.text.length < 3) return hide();
+      // Wait until typing pauses so we don't flood Discogs (60 requests/min).
+      timer = setTimeout(async () => {
+        try {
+          const res = await fetch("/suggest?q=" + encodeURIComponent(line.text));
+          show(await res.json());
+        } catch (e) { hide(); }
+      }, 400);
+    });
+ 
+    box.addEventListener("blur", hide);
+    box.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+  </script>
 </body>
 </html>
