@@ -6,3 +6,4 @@ May go down if not used for a while.
 To Do:
 Add CSS style
 Improve suggestion similarity 
+Fix autocomplete 
