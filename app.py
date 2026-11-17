@@ -14,7 +14,7 @@ import time
 from collections import Counter
 
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 API_ROOT = "https://api.discogs.com"
 USER_AGENT = "SimilarAlbums/1.0 +https://github.com/example/similar-albums"
@@ -219,6 +219,22 @@ def index():
             except DiscogsError as exc:
                 ctx["error"] = str(exc)
     return render_template("index.html", **ctx)
+
+@app.route("/suggest")
+def suggest():
+    q = request.args.get("q", "").strip()
+    if len(q) < 3:
+        return jsonify([])
+    try:
+        results = discogs_search(q=q, type="master", per_page=10)
+    except DiscogsError:
+        return jsonify([])
+    titles = []
+    for r in results:
+        title = r.get("title", "")
+        if title and title not in titles:
+            titles.append(title)
+    return jsonify(titles[:6])
 
 
 if __name__ == "__main__":
