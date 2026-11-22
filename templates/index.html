@@ -10,7 +10,9 @@
   <p>Enter a album you like (e.g. Radiohead - Kid A). Powered by Discogs.</p>
 
   <form method="post">
-    <textarea name="albums" rows="6" cols="60">{{ query }}</textarea><br>
+    <textarea id="albums" name="albums" rows="6" cols="60">{{ query }}</textarea>
+    <ul id="suggestions" hidden></ul>
+    <p id="status"></p>
     <button type="submit">Get</button>
   </form>
 
@@ -97,3 +99,4 @@
   </script>
 </body>
 </html>
+
