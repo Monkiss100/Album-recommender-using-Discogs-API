@@ -1,13 +1,3 @@
-"""Album recommender powered by the Discogs API.
-
-Discogs has no "similar albums" endpoint, so this app builds its own:
-  1. Look up each album the user enters and read its genres, styles and year.
-  2. Search Discogs for other albums sharing the most common styles.
-  3. Score every candidate by style/genre overlap, closeness in year and
-     popularity (how many Discogs users own it), then show the best matches.
-
-Run:  DISCOGS_TOKEN=your_token python app.py
-"""
 import math
 import os
 import time
@@ -26,14 +16,22 @@ RESULTS_SHOWN = 5
 app = Flask(__name__)
 _cache = {}
 
-
+def read_token_file():
+    """Fallback: read the token from token.txt next to this file. Check in render is set"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "token.txt")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return f.read().strip().strip('"').strip("'")
+    except OSError:
+        return None
+    
 class DiscogsError(Exception):
     """Raised with a message that is safe to show to the user."""
 
 
 def discogs_search(**params):
     """Call /database/search with caching and friendly error messages."""
-    token = os.environ.get("DISCOGS_TOKEN")
+    token = os.environ.get("DISCOGS_TOKEN") or read_token_file() 
     if not token:
         raise DiscogsError(
             "DISCOGS_TOKEN is not set."
